@@ -1,0 +1,24 @@
+{
+  "_comment": "Hooks for Codex and OpenCode, in Claude Code's event and tool names. Claude Code keeps its own copy in ~/.claude/settings.json. A script missing from this folder is skipped. OpenCode runs only the tool events; SessionStart is Codex only (OpenCode loads memory through instructions).",
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "script": "git_write_guard.py",
+      "timeout": 15
+    },
+    {
+      "matcher": "Read|Edit|Write|NotebookEdit|Grep|Glob|Bash",
+      "script": "graph_pulse.py",
+      "timeout": 5,
+      "async": true
+    }
+  ],
+  "PostToolUse": [],
+  "SessionStart": [
+    {
+      "matcher": "startup|resume|clear|compact",
+      "script": "session_context.py",
+      "timeout": 30
+    }
+  ]
+}

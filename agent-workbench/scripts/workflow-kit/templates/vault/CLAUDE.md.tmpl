@@ -1,0 +1,45 @@
+# Vault rules
+
+This vault is Claude's long-term memory across sessions and repositories, and the
+home of its configuration. Notes are plain Markdown with YAML frontmatter.
+
+## Layout
+
+| Folder | Holds | Used by Claude as |
+|---|---|---|
+| `memory/` | One durable fact per file, plus the recall index `MEMORY.md` | auto-memory of every project |
+| `knowledge/` | Findings that outlive one project | notes |
+| `projects/` | One note per project: state, branches, open tickets | notes |
+| `decisions/` | Dated records of choices and rejected alternatives | notes |
+| `agents/` | Subagent definitions | `~/.claude/agents` |
+| `commands/` | Slash commands | `~/.claude/commands` |
+| `scripts/hooks/` | Hook scripts registered in `settings.json` | `~/.claude/hooks` |
+| `scripts/bin/` | Helper programs | `~/.claude/bin` |
+| `workflow/CLAUDE.md` | How Claude works: routes, team, review, verification | `~/.claude/CLAUDE.md` |
+| `project-agents/<set>/` | Agents for one project; global on a PC that lists the set in `~/.claude/global-agent-sets` | linked per project by the Claude Configuration app |
+
+`agents/`, `commands/`, `scripts/` and `workflow/` are live configuration, not notes. Put no
+notes there: every Markdown file in `agents/` or `commands/` becomes an agent or a
+command.
+
+## When to write
+
+Write a note only if the fact outlives the session, cannot be derived from code or
+history, and saves real work next time. Search the vault first and extend an
+existing note instead of adding a second one. Never store credentials, transcripts
+or chat summaries.
+
+## memory/
+
+Every file holds one fact with this frontmatter:
+
+```yaml
+---
+name: kebab-case-slug          # equals the file name
+description: one line, used to decide relevance during recall
+metadata:
+  type: user | feedback | project | reference
+---
+```
+
+Add one line per memory to `memory/MEMORY.md`.

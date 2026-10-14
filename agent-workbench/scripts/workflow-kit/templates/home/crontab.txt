@@ -1,0 +1,1 @@
+37 9 * * * /home/agent-workbench-user/.claude/bin/insights-monthly.sh

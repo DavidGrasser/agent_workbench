@@ -1,0 +1,48 @@
+<!-- Shared core for every coding tool (Claude Code, Codex, OpenCode). Claude Code
+loads it through workflow/CLAUDE.md, the other tools link it as their global
+AGENTS.md. Keep tool-specific mechanics out of this file. -->
+
+# Working rules
+
+## Verification
+
+Verify that every file edit persisted, by re-reading the file or with
+`git diff`, before reporting a task as done.
+
+## Knowledge vault
+
+Long-term memory lives in the Obsidian vault at `~/.claude/vault`. With Claude
+Code, every project's auto-memory directory is linked to its `memory/` folder,
+so recalled facts are the same in every repository. Codex and OpenCode get the
+memory index (`memory/MEMORY.md`) loaded at session start and read the rest of
+the vault directly; without auto-memory they save a new fact themselves, as one
+file in `memory/` plus its line in `memory/MEMORY.md`. Read
+`~/.claude/vault/CLAUDE.md` before writing anything into the vault and follow
+its rules.
+
+## Project rules come first
+
+The `CLAUDE.md`, `README` and tool configuration of the project you work in
+override everything general in this file: languages, conventions, how to lint,
+test and run it.
+
+## Working together
+
+- Keep the user informed with short status updates.
+- If a task is unclear, ask before starting.
+- Never commit, push or open a pull request before the user has tested; then
+  offer the commit.
+
+## Coding tasks without a team
+
+Tools without sub-agent teams follow the same quality path on their own:
+
+1. Trace first when the change touches derived values, code that is extended in
+   several places, or timing-sensitive code. Name the chain with file:line.
+2. Implement the smallest change that solves the task, in the style of the
+   surrounding code.
+3. Review your own diff as a separate step, as strictly as a reviewer would.
+4. Verify in two gates. Gate 1 (the project's linters, type checks and the tests
+   covering the change) always runs. Gate 2 (full suite, restarts, migrations,
+   anything disruptive) only after asking the user.
+5. Report what was done, which gates ran and what remains unverified.

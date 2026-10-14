@@ -1,0 +1,77 @@
+@~/.claude/vault/workflow/AGENTS.md
+
+# Workflow: coding tasks
+
+## 0. Choose the route
+
+- **Do it yourself, no team:** the change is confined to one file, changes no
+  behavior and is a handful of lines: a string, a label, a comment, a constant.
+- **Team:** everything else, anything touching logic, data, configuration or
+  more than one file. When in doubt, take the team route.
+- **Several independent tickets:** split them and run one coder per ticket in
+  parallel, each with `isolation: "worktree"` so they cannot collide. Never let
+  two agents work against the same database or service at the same time.
+
+## 1. Team
+
+- `TeamCreate` with team name `coding`, then `TaskCreate` for the work.
+- Spawn the `coder` with the full task: files, requirements, constraints. First
+  instruction in its prompt: `Run: printf '\033]2;Coder: <short summary>\033\\'`
+  to set its pane title.
+- Once you took the team route, do not write the code yourself.
+
+## 2. tracer, available to everyone
+
+`tracer` is read-only and maps dependency and execution chains. You may call it
+directly to diagnose before choosing an approach; `coder` and `reviewer` call it
+themselves. Use it whenever a diagnosis is uncertain, a first fix failed, or the
+change touches derived values, extended code or timing-sensitive code. It
+returns a report, never a patch.
+
+## 3. Review
+
+When the coder is done, spawn the `reviewer` with the changed files and the
+original task (pane title `Reviewer: <short summary>`).
+
+- Findings go back to the coder via `SendMessage`, the fixes back to the
+  reviewer. At most three rounds; after that, report to the user.
+
+## 4. Verification
+
+When the review passes, spawn the `verifier` (pane title
+`Verifier: <short summary>`).
+
+- Gate 1 (scoped linters, type checks, the covering tests) always runs.
+- Gate 2 (full suite, restarts, migrations, anything disruptive) runs only after
+  you asked the user and wrote the authorization into the verifier's prompt.
+- A gate 1 failure goes back to the coder. A gate 2 failure caused by the
+  environment, not the code, is a finding for the user.
+
+## 5. Behavior in the browser
+
+`ui-inspector` drives the running application and reports what the screen does.
+Use it when the open question is behavior, not building. A deviation it finds
+goes to the coder.
+
+## 6. Finish
+
+- Report what was done, that the review passed and which gates actually ran.
+  Name what remains unverified.
+- **Never commit before the user has tested.** Then offer the commit. Subagents
+  never commit, push or stage.
+- Shut the teammates down and delete the team.
+
+## 7. Close the loop
+
+A review finding the coder should have known is a gap in the setup. Append one
+line to `~/.claude/vault/knowledge/review-recurring-findings.md`: the rule, the
+date and the project. When a rule has been hit three times, propose to the user
+to promote it into the coder's definition or into a hook.
+
+# Rules
+
+- The user talks only to you, the main agent. Keep them informed with short
+  status updates.
+- If a task is unclear, ask before creating the team.
+- Questions, explanations and configuration changes are handled by you directly,
+  without a team.
